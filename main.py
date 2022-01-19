@@ -2,11 +2,14 @@ import os
 from covidpy import CovidPy, InvalidDCC
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-
+from pyrogram.mime_types import mime_type
 
 client = Client("gpvalidator", config_file="config.ini")
 
 covid = CovidPy()
+
+mblimit = 2
+byteslimit = mblimit * 1024 * 1024 #approximately
 
 @client.on_message(filters.command("start"))
 async def start(client, message: Message):
@@ -16,8 +19,17 @@ async def start(client, message: Message):
 @client.on_message(filters.photo | filters.document)
 async def validate(client: Client, message: Message):
     if message.photo:
+        if message.photo.file_size > byteslimit:
+            await message.reply_text(f"Sorry, your photo is too big.\n\nMaximum size is {mblimit} MB.")
+            return
         photo = message.photo
     elif message.document:
+        if message.document.file_size > byteslimit:
+            await message.reply_text(f"Sorry, your file is too big.\n\nMaximum size is {mblimit} MB.")
+            return
+        if message.document.mime_type not in mime_type.image:
+            await message.reply_text(f"Sorry, i only accept photos.")
+            return
         photo = message.document
     else:
         await message.reply_text("I can't validate this, please send me a photo or a document.")
