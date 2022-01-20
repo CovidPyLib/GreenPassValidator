@@ -26,7 +26,7 @@ async def validate(client: Client, message: Message):
         if message.document.file_size > byteslimit:
             await message.reply_text(f"Sorry, your file is too big.\n\nMaximum size is {mblimit} MB.")
             return
-        if not message.document.mime_type.startswith('image/') or message.document.mime_type == 'image/gif:
+        if not message.document.mime_type.startswith('image/') or message.document.mime_type == 'image/gif':
             await message.reply_text(f"Sorry, i only accept photos.")
             return
         photo = message.document
