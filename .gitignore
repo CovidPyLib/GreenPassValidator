@@ -1,6 +1,7 @@
 # pyrogram
 *.session
 config.ini
+production.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

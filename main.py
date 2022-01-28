@@ -41,8 +41,49 @@ async def validate(client: Client, message: Message):
         await message.reply_text(f"Sorry, i can't validate this Green Pass.\n{e.details}")
         return
     if data.valid:
-        await message.reply_text(f"Your Green Pass is valid ☑️")
+        await message.reply_text(f"Your Green Pass is valid ☑️\nclick on the button below to show more infos", 
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Show more infos", callback_data=f"infos-{message.message_id}")]]))
     else:
-        await message.reply_text("Your Green Pass is invalid ❌\nReason: " + "revoked" if data.revoked else "signature isn't valid")
+        await message.reply_text("Your Green Pass is invalid ❌\nReason: " + "revoked" if data.revoked else "signature isn't valid" + "\nclick on the button below to show more infos", InlineKeyboardMarkup([[InlineKeyboardButton("Show more infos", callback_data=f"infos-{message.message_id}")]]))
+
+@client.on_callback_query()
+async def callback(client: Client, query: CallbackQuery):
+    if query.data.startswith("infos-"):
+        photo = await client.get_messages(query.message.chat.id, int(query.data.split("-")[1]))
+        if photo.photo:
+            photo = photo.photo
+        elif photo.document:
+            photo = photo.document
+        else:
+            await query.answer("Sorry, i can't show you more infos.")
+            return
+        try:
+            p = await client.download_media(photo)
+            infos = covid.decode(p)
+            cert_type = infos.certificate_type
+            cert = None
+            if cert_type == "vaccine":
+                cert = infos.vaccination_certificate
+            elif cert_type == "test":
+                cert = infos.test_certificate
+            else:
+                cert = infos.recovery_certificate
+            unique_id = cert[0].certificate_identifier
+            mytxt = f"""
+Name: ```{infos.owner.first_name}```
+Surname: ```{infos.owner.last_name}```
+Birthdate: ```{infos.owner.date_of_birth}```
+Valid: ```{covid.verify(p).valid}```
+Unique identifier: ```{unique_id}```
+Certificate type: ```{cert_type}```
+            """
+            os.remove(p)
+            await query.message.edit_text(mytxt)
+        except InvalidDCC:
+            await query.answer("Sorry, i can't show you more infos.")
+            return  
+    else:
+        await query.answer("Sorry, i can't show you more infos.")
+
 
 client.run()
