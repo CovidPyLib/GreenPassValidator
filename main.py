@@ -27,7 +27,7 @@ async def validate(client: Client, message: Message):
             await message.reply_text(f"Sorry, your file is too big.\n\nMaximum size is {mblimit} MB.")
             return
         if not message.document.mime_type.startswith('image/') or message.document.mime_type == 'image/gif':
-            await message.reply_text(f"Sorry, i only accept photos.")
+            await message.reply_text('Sorry, i only accept photos.')
             return
         photo = message.document
     else:
@@ -41,8 +41,20 @@ async def validate(client: Client, message: Message):
         await message.reply_text(f"Sorry, i can't validate this Green Pass.\n{e.details}")
         return
     if data.valid:
-        await message.reply_text(f"Your Green Pass is valid ☑️\nclick on the button below to show more infos", 
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Show more infos", callback_data=f"infos-{message.message_id}")]]))
+        await message.reply_text(
+            'Your Green Pass is valid ☑️\nclick on the button below to show more infos',
+            reply_markup=InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            "Show more infos",
+                            callback_data=f"infos-{message.message_id}",
+                        )
+                    ]
+                ]
+            ),
+        )
+
     else:
         await message.reply_text("Your Green Pass is invalid ❌\nReason: " + "revoked" if data.revoked else "signature isn't valid" + "\nclick on the button below to show more infos", InlineKeyboardMarkup([[InlineKeyboardButton("Show more infos", callback_data=f"infos-{message.message_id}")]]))
 
