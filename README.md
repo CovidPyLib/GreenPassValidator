@@ -4,7 +4,6 @@ See [this](https://github.com/CovidPyLib/CovidPy/commit/83b71721c828cc743a801ae1
 # GreenPassValidator
 
 This is an example telegram bot for [CovidPy](https://CovidPyLib/CovidPy)
-You can find a working example on [Telegram](https://t.me/greenpassvalidatorbot)
 
 # Licensed under GPL v3.0 or later
 
